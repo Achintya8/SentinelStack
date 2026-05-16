@@ -23,9 +23,7 @@ const db = client.db();
 const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
 const baseAuthOptions = {
-  database: mongodbAdapter(db, {
-    client
-  }),
+  database: mongodbAdapter(db),
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true
