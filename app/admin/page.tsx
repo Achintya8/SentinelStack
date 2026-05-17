@@ -1,5 +1,6 @@
 import { AdminCommandCenter } from "@/components/admin-command-center";
 import { auth } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -9,8 +10,8 @@ export default async function AdminPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim());
-  if (adminEmails.length > 0 && !adminEmails.includes(session.user.email)) {
+  // SECURITY FIX: fail-closed admin check (denies when ADMIN_EMAILS is missing/empty).
+  if (!isAdminEmail(session.user.email)) {
     return (
       <main className="mx-auto flex max-w-7xl flex-col items-center justify-center px-5 py-24">
         <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-8 text-center text-red-200 shadow-[0_0_15px_rgba(239,68,68,0.15)]">

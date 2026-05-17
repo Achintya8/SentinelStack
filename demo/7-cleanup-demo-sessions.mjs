@@ -4,9 +4,14 @@
  */
 
 import { MongoClient } from "mongodb";
+import "dotenv/config";
 
-const MONGODB_URI = process.env.MONGODB_URI ||
-  "mongodb+srv://achintyak30_db_user:yH5jGWtgurp0waC8@sentinentalstack.jnxkadl.mongodb.net/?appName=sentinentalStack";
+// SECURITY FIX: removed hardcoded MongoDB credentials; loaded from .env / .env.local via dotenv.
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error("MONGODB_URI is not set. Add it to .env.local before running this demo.");
+  process.exit(1);
+}
 
 const DEMO_IPS = [
   "117.215.0.1", "74.125.0.1", "81.2.69.1", "203.0.113.1",

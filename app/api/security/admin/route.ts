@@ -5,6 +5,7 @@ import { connectMongoose } from "@/lib/db";
 import { SecurityLog } from "@/lib/models/security-log";
 import { Session } from "@/lib/models/session";
 import { User } from "@/lib/models/user";
+import { isAdminEmail } from "@/lib/admin";
 
 export const runtime = "nodejs";
 
@@ -15,8 +16,8 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim());
-  if (adminEmails.length > 0 && !adminEmails.includes(current.user.email)) {
+  // SECURITY FIX: fail-closed admin check (denies when ADMIN_EMAILS is missing/empty).
+  if (!isAdminEmail(current.user.email)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

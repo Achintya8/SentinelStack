@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectMongoose } from "@/lib/db";
 import { User } from "@/lib/models/user";
 import { recordSecurityEvent, getClientIp } from "@/lib/security";
+import { isAdminEmail } from "@/lib/admin";
 
 export const runtime = "nodejs";
 
@@ -13,8 +14,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim());
-  if (!adminEmails.includes(session.user.email)) {
+  // SECURITY FIX: fail-closed admin check.
+  if (!isAdminEmail(session.user.email)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -23,10 +23,27 @@ const db = client.db();
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const baseAuthOptions = {
   database: mongodbAdapter(db, {
     client
   }),
+  // SECURITY FIX: harden all better-auth-issued cookies (session, CSRF, OAuth
+  // state, etc.). HttpOnly blocks JS access (mitigates XSS token theft), Secure
+  // forces HTTPS in production, and SameSite=Lax prevents cross-site request
+  // forgery while remaining compatible with the OAuth redirect flow — `strict`
+  // would drop the state cookie on the return hop from Google/GitHub and break
+  // social login.
+  advanced: {
+    useSecureCookies: isProduction,
+    defaultCookieAttributes: {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax" as const,
+      path: "/"
+    }
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true

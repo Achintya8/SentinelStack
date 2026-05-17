@@ -5,6 +5,7 @@ import { connectMongoose } from "@/lib/db";
 import { User } from "@/lib/models/user";
 import { getClientIp, recordSecurityEvent } from "@/lib/security";
 import { verifyCaptcha } from "@/lib/captcha";
+import { rateLimit, pruneExpired } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON request body." }, { status: 400 });
   }
   const ip = getClientIp(request.headers);
+
+  // SECURITY FIX: throttle registration to slow account-creation abuse.
+  pruneExpired();
+  const regLimit = rateLimit({
+    key: `register-ip:${ip}`,
+    limit: 5,
+    windowMs: 60_000
+  });
+  if (!regLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many registration attempts. Try again shortly." },
+      { status: 429, headers: { "Retry-After": String(regLimit.retryAfterSeconds) } }
+    );
+  }
 
   if (body.website?.trim()) {
     await recordSecurityEvent({

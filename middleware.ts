@@ -59,13 +59,18 @@ export function middleware(request: NextRequest) {
 
   // Expire both cookie names on every outbound auth response so the browser
   // drops them. Expiring a non-existent cookie is a no-op.
+  // SECURITY FIX: mark Secure in production so the cleared cookie attributes
+  // match the originally-issued cookie attributes (browsers will only honor the
+  // expiration when attributes match).
+  const isProd = process.env.NODE_ENV === "production";
   response.cookies.set({
     name: "better-auth.trust_device",
     value: "",
     maxAge: 0,
     path: "/",
     httpOnly: true,
-    sameSite: "lax"
+    sameSite: "lax",
+    secure: isProd
   });
   response.cookies.set({
     name: "__Secure-better-auth.trust_device",

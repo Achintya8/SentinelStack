@@ -27,22 +27,25 @@ export async function GET() {
     .sort({ createdAt: -1 })
     .lean();
 
+  const currentToken = (current.session as { token?: string }).token;
+
   return NextResponse.json({
     currentSessionId: current.session.id,
+    // SECURITY FIX: never return session.token to the client. Revocation now happens
+    // via POST /api/security/sessions/revoke with the session id only.
     sessions: sessions.map((session) => ({
       id: session.id ?? session._id.toString(),
-      token: session.token,
       ipAddress: session.ipAddress ?? "Unknown IP",
       userAgent: session.userAgent ?? "Unknown device",
       device: userAgentToDevice(session.userAgent),
-      location: typeof session.location === "string" 
-        ? JSON.parse(session.location) 
+      location: typeof session.location === "string"
+        ? JSON.parse(session.location)
         : (session.location ?? null),
       createdAt: session.createdAt,
       expiresAt: session.expiresAt,
       isCurrent:
         session.id === current.session.id ||
-        session.token === (current.session as { token?: string }).token
+        (currentToken !== undefined && session.token === currentToken)
     }))
   });
 }

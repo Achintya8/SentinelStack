@@ -6,9 +6,9 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { TwoFactorSettings } from "@/components/two-factor-settings";
 
+// SECURITY FIX: session tokens are no longer returned to the client. Revoke by id via API.
 type ProfileSession = {
   id: string;
-  token: string;
   ipAddress: string;
   device: string;
   location?: { city?: string; country?: string; lat?: number; lon?: number } | null;
@@ -82,8 +82,13 @@ export function ProfileDashboard() {
   }, [isFlagged, risk]);
 
   async function revoke(session: ProfileSession) {
+    // SECURITY FIX: revoke via server endpoint by id, not by token.
     try {
-      await authClient.revokeSession({ token: session.token });
+      await fetch("/api/security/sessions/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: session.id })
+      });
     } catch (e) {
       console.error("Failed to revoke session:", e);
     }

@@ -1,5 +1,9 @@
 node_modules/
 .next/
 tsconfig.tsbuildinfo
+# SECURITY FIX: ensure no env files with real secrets are ever committed.
 .env
-.env*.local
+.env.local
+.env.*.local
+.env.production
+.env.development

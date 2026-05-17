@@ -3,6 +3,7 @@ import { APIError } from "better-auth/api";
 import { auth } from "@/lib/auth";
 import { recordSecurityEvent, getClientIp } from "@/lib/security";
 import { verifyCaptcha } from "@/lib/captcha";
+import { rateLimit, pruneExpired } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -90,6 +91,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON request body." }, { status: 400 });
   }
   const ip = getClientIp(request.headers);
+
+  // SECURITY FIX: throttle login attempts to slow down credential stuffing / brute force.
+  // 10 attempts per IP per 60s, plus a stricter 20-per-15-minute window per IP+email.
+  pruneExpired();
+  const ipLimit = rateLimit({ key: `login-ip:${ip}`, limit: 10, windowMs: 60_000 });
+  if (!ipLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Try again shortly." },
+      { status: 429, headers: { "Retry-After": String(ipLimit.retryAfterSeconds) } }
+    );
+  }
+  if (body.email) {
+    const emailLimit = rateLimit({
+      key: `login-email:${ip}:${body.email.toLowerCase()}`,
+      limit: 20,
+      windowMs: 15 * 60_000
+    });
+    if (!emailLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many login attempts for this account. Try again later." },
+        { status: 429, headers: { "Retry-After": String(emailLimit.retryAfterSeconds) } }
+      );
+    }
+  }
 
   const captchaOk = await verifyCaptcha(body.captchaToken);
   if (!captchaOk) {
