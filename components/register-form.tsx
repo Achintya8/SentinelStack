@@ -77,21 +77,26 @@ export function RegisterForm() {
       return;
     }
 
-    const response = await fetch("/api/security/register", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const response = await fetch("/api/security/register", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    if (!response.ok) {
-      const data = (await response.json().catch(() => null)) as { error?: string } | null;
-      setError(data?.error ?? "Registration failed.");
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        setError(data?.error ?? "Registration failed.");
+        setPending(false);
+        return;
+      }
+
+      router.push(`/verify-request?email=${encodeURIComponent(payload.email)}`);
+      router.refresh();
+    } catch (err: any) {
+      setError(err?.message ?? "A network error occurred. Please try again.");
       setPending(false);
-      return;
     }
-
-    router.push(`/verify-request?email=${encodeURIComponent(payload.email)}`);
-    router.refresh();
   }
 
   return (
