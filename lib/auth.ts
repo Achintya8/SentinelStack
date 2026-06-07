@@ -32,6 +32,7 @@ const client = new MongoClient(mongoUri);
 const db = client.db();
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
+const emailFrom = process.env.EMAIL_FROM || "SentinelStack Security <onboarding@resend.dev>";
 
 const baseAuthOptions = {
   database: mongodbAdapter(db, {
@@ -47,14 +48,16 @@ const baseAuthOptions = {
     sendVerificationEmail: async ({ user, url }) => {
       try {
         await resend.emails.send({
-          from: process.env.EMAIL_FROM || "SentinelStack Security <onboarding@resend.dev>",
+          from: emailFrom,
           to: user.email,
           subject: "Verify your SentinelStack Account",
-          html: `<div style="background:#0f172a;color:#fff;padding:20px;font-family:sans-serif;text-align:center;">
-                   <h2>Welcome to SentinelStack, ${user.name}!</h2>
-                   <p>Please verify your email address to activate your security dashboard.</p>
-                   <br/>
-                   <a href="${url}" style="background:#06b6d4;color:#000;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">Verify Email</a>
+          html: `<div style="max-width:500px;margin:0 auto;background:#0f172a;color:#ffffff;padding:40px 20px;font-family:sans-serif;text-align:center;border-radius:8px;border:1px solid #1e293b;">
+                   <h2 style="margin-top:0;color:#ffffff;font-size:24px;">Welcome to SentinelStack, ${user.name}!</h2>
+                   <p style="color:#94a3b8;font-size:16px;line-height:1.5;">Please verify your email address to activate your security dashboard.</p>
+                   <div style="margin:30px 0;">
+                     <a href="${url}" style="display:inline-block;background:#06b6d4;color:#0f172a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:16px;box-shadow:0 4px 12px rgba(6,182,212,0.2);">Verify Email</a>
+                   </div>
+                   <p style="font-size:12px;color:#64748b;margin-bottom:0;">If you did not request this verification, you can safely ignore this email.</p>
                  </div>`
         });
       } catch (error) {
@@ -390,15 +393,16 @@ const authOptions = {
       sendMagicLink: async ({ email, url }) => {
         try {
           await resend.emails.send({
-            from: process.env.EMAIL_FROM || "SentinelStack Security <onboarding@resend.dev>",
+            from: emailFrom,
             to: email,
             subject: "Your SentinelStack Magic Link",
-            html: `<div style="background:#0f172a;color:#fff;padding:20px;font-family:sans-serif;text-align:center;">
-                     <h2>Secure Sign-In</h2>
-                     <p>Click the link below to securely sign into SentinelStack.</p>
-                     <br/>
-                     <a href="${url}" style="background:#06b6d4;color:#000;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">Sign In with Magic Link</a>
-                     <p style="margin-top:20px;font-size:12px;color:#94a3b8;">This link expires shortly and can only be used once.</p>
+            html: `<div style="max-width:500px;margin:0 auto;background:#0f172a;color:#ffffff;padding:40px 20px;font-family:sans-serif;text-align:center;border-radius:8px;border:1px solid #1e293b;">
+                     <h2 style="margin-top:0;color:#ffffff;font-size:24px;">Secure Sign-In</h2>
+                     <p style="color:#94a3b8;font-size:16px;line-height:1.5;">Click the link below to securely sign into SentinelStack.</p>
+                     <div style="margin:30px 0;">
+                       <a href="${url}" style="display:inline-block;background:#06b6d4;color:#0f172a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:16px;box-shadow:0 4px 12px rgba(6,182,212,0.2);">Sign In with Magic Link</a>
+                     </div>
+                     <p style="margin-top:20px;font-size:12px;color:#64748b;margin-bottom:0;">This link expires shortly and can only be used once.</p>
                    </div>`
           });
         } catch (error) {
@@ -414,14 +418,14 @@ const authOptions = {
       async sendVerificationOTP({ email, otp }) {
         try {
           await resend.emails.send({
-            from: process.env.EMAIL_FROM || "SentinelStack Security <onboarding@resend.dev>",
+            from: emailFrom,
             to: email,
             subject: "Your SentinelStack Security Passcode",
-            html: `<div style="background:#0f172a;color:#fff;padding:20px;font-family:sans-serif;text-align:center;">
-                     <h2>One-Time Passcode</h2>
-                     <p>Use the following 6-digit code to verify your identity.</p>
-                     <div style="background:#1e293b;color:#22d3ee;padding:15px;font-size:28px;letter-spacing:6px;font-weight:bold;border-radius:5px;margin:20px auto;max-width:200px;">${otp}</div>
-                     <p style="font-size:12px;color:#94a3b8;">Do not share this code with anyone.</p>
+            html: `<div style="max-width:500px;margin:0 auto;background:#0f172a;color:#ffffff;padding:40px 20px;font-family:sans-serif;text-align:center;border-radius:8px;border:1px solid #1e293b;">
+                     <h2 style="margin-top:0;color:#ffffff;font-size:24px;">One-Time Passcode</h2>
+                     <p style="color:#94a3b8;font-size:16px;line-height:1.5;">Use the following 6-digit code to verify your identity.</p>
+                     <div style="background:#1e293b;color:#22d3ee;padding:15px;font-size:32px;letter-spacing:8px;font-weight:bold;border-radius:6px;margin:25px auto;max-width:220px;border:1px solid rgba(34,211,238,0.2);box-shadow:0 4px 12px rgba(34,211,238,0.05);text-align:center;padding-left:8px;">${otp}</div>
+                     <p style="font-size:12px;color:#64748b;margin-bottom:0;">Do not share this code with anyone. It is only valid for a limited time.</p>
                    </div>`
           });
         } catch (error) {

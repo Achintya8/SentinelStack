@@ -44,6 +44,7 @@ export function RegisterForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setError("");
 
     setPending(true);
@@ -55,7 +56,7 @@ export function RegisterForm() {
       return;
     }
 
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
     const focusToSubmitMs = firstFocusAt.current ? Math.round(performance.now() - firstFocusAt.current) : 0;
     const payload = {
       name: String(form.get("name") ?? ""),
@@ -76,21 +77,26 @@ export function RegisterForm() {
       return;
     }
 
-    const response = await fetch("/api/security/register", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const response = await fetch("/api/security/register", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    if (!response.ok) {
-      const data = (await response.json().catch(() => null)) as { error?: string } | null;
-      setError(data?.error ?? "Registration failed.");
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        setError(data?.error ?? "Registration failed.");
+        setPending(false);
+        return;
+      }
+
+      router.push(`/verify-request?email=${encodeURIComponent(payload.email)}`);
+      router.refresh();
+    } catch (err: any) {
+      setError(err?.message ?? "A network error occurred. Please try again.");
       setPending(false);
-      return;
     }
-
-    router.push(`/verify-request?email=${encodeURIComponent(payload.email)}`);
-    router.refresh();
   }
 
   return (
