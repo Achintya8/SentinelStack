@@ -42,11 +42,12 @@ export function LoginForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setError("");
     setPending(true);
 
     const captchaToken = await executeRecaptcha("login");
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
 
     const response = await fetch("/api/security/login", {
       method: "POST",

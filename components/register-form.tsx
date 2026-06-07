@@ -44,6 +44,7 @@ export function RegisterForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setError("");
 
     setPending(true);
@@ -55,7 +56,7 @@ export function RegisterForm() {
       return;
     }
 
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
     const focusToSubmitMs = firstFocusAt.current ? Math.round(performance.now() - firstFocusAt.current) : 0;
     const payload = {
       name: String(form.get("name") ?? ""),
