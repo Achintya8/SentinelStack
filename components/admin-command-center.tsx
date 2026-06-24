@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Skeleton } from "@/components/skeleton";
 import {
   AlertTriangle,
   BrainCircuit,
@@ -24,7 +25,14 @@ import {
   Bot
 } from "lucide-react";
 
-const Globe = dynamic(() => import("react-globe.gl"), { ssr: false });
+const Globe = dynamic(() => import("react-globe.gl"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[520px] items-center justify-center">
+      <Skeleton className="h-64 w-64 rounded-full" />
+    </div>
+  )
+});
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -316,9 +324,17 @@ export function AdminCommandCenter() {
 
       {/* ── Metric cards ── */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <Metric title="Active Sessions" value={sessions.length} icon={RadioTower}  color="cyan" />
-        <Metric title="Flagged Nodes"   value={flaggedCount}    icon={AlertTriangle} color="red"  />
-        <Metric title="AI Reviewed"     value={aiCount}         icon={BrainCircuit} color="violet" />
+        {status === "connecting" && !initialised.current ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full rounded-xl" />
+          ))
+        ) : (
+          <>
+            <Metric title="Active Sessions" value={sessions.length} icon={RadioTower}  color="cyan" />
+            <Metric title="Flagged Nodes"   value={flaggedCount}    icon={AlertTriangle} color="red"  />
+            <Metric title="AI Reviewed"     value={aiCount}         icon={BrainCircuit} color="violet" />
+          </>
+        )}
       </section>
 
       {/* ── Tab Navigation ── */}
@@ -824,9 +840,9 @@ function InsightRow({ label, value }: { label: string; value?: string }) {
 
 function FeedSkeleton() {
   return (
-    <div className="grid gap-2.5 animate-pulse">
+    <div className="grid gap-2.5">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-20 rounded-lg border border-cyan-300/10 bg-slate-900/60" />
+        <Skeleton key={i} className="h-20 rounded-lg" />
       ))}
     </div>
   );

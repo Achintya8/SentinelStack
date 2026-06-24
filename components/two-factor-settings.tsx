@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import QRCode from "qrcode";
 import { authClient } from "@/lib/auth-client";
+import { Skeleton } from "@/components/skeleton";
 
 type Phase =
   | "idle"
@@ -231,8 +232,16 @@ export function TwoFactorSettings({ hasPassword = true }: { hasPassword?: boolea
 
   if (isPending) {
     return (
-      <div className="flex h-32 items-center justify-center rounded-xl bg-slate-900/50">
-        <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+      <div className="flex items-start justify-between gap-6 rounded-xl border border-white/5 bg-slate-900/30 p-6">
+        <div className="flex flex-1 gap-4">
+          <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-56" />
+            <Skeleton className="h-3.5 w-full max-w-lg" />
+            <Skeleton className="h-3.5 w-2/3" />
+          </div>
+        </div>
+        <Skeleton className="h-10 w-32 rounded-lg" />
       </div>
     );
   }

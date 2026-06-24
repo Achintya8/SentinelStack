@@ -5,6 +5,7 @@ import { MonitorCheck, ShieldAlert, ShieldCheck, Trash2, AlertTriangle, Key, Eye
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { TwoFactorSettings } from "@/components/two-factor-settings";
+import { Skeleton, ProfileDashboardSkeleton } from "@/components/skeleton";
 
 type ProfileSession = {
   id: string;
@@ -180,7 +181,7 @@ export function ProfileDashboard() {
   }
 
   if (isPending) {
-    return <div className="text-slate-300">Loading profile...</div>;
+    return <ProfileDashboardSkeleton />;
   }
 
   if (!data) {
@@ -232,11 +233,14 @@ export function ProfileDashboard() {
             </thead>
             <tbody>
               {loadingSessions ? (
-                <tr>
-                  <td className="px-5 py-6 text-slate-400" colSpan={4}>
-                    Loading sessions...
-                  </td>
-                </tr>
+                Array.from({ length: 3 }).map((_, i) => (
+                  <tr key={i} className="border-b border-cyan-300/10 last:border-0">
+                    <td className="px-5 py-4"><Skeleton className="h-8 w-32" /></td>
+                    <td className="px-5 py-4"><Skeleton className="h-4 w-48" /></td>
+                    <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                    <td className="px-5 py-4"><Skeleton className="h-8 w-28 rounded-md" /></td>
+                  </tr>
+                ))
               ) : (
                 sessions.map((session) => (
                   <tr key={session.id} className="border-b border-cyan-300/10 last:border-0">
@@ -295,7 +299,10 @@ export function ProfileDashboard() {
         </div>
         <div className="p-5 grid gap-4 md:grid-cols-2">
           {loadingAccounts ? (
-            <p className="text-sm text-slate-400">Loading accounts...</p>
+            <>
+              <Skeleton className="h-[68px] w-full rounded-md" />
+              <Skeleton className="h-[68px] w-full rounded-md" />
+            </>
           ) : (
             <>
               <div className="flex items-center justify-between rounded-md border border-slate-800 bg-slate-900 p-4">
@@ -353,7 +360,7 @@ export function ProfileDashboard() {
         </div>
         <div className="p-5">
           {loadingAccounts ? (
-            <p className="text-sm text-slate-400">Loading...</p>
+            <Skeleton className="h-16 w-full max-w-md rounded-md" />
           ) : accounts.some(a => a.providerId === "credential") ? (
             <div className="rounded-md border border-slate-800 bg-slate-900/50 p-4">
               <p className="text-sm text-slate-300">Your account already has a password set. You can use your email and password to log in.</p>

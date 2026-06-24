@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import PillNav, { type PillNavItem } from "./PillNav";
 import { ThemeToggle } from "./theme-toggle";
+import { Skeleton } from "./skeleton";
 
 export function Navbar() {
   const { data: session, isPending } = authClient.useSession();
@@ -35,17 +36,27 @@ export function Navbar() {
     // while the theme switcher sits on the right.
     <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
       <span aria-hidden className="h-9 w-9 shrink-0" />
-      <PillNav
-        logo="/logo.svg"
-        logoAlt="SentinelStack"
-        items={items}
-        activeHref={pathname}
-        baseColor="#0f172a"
-        pillColor="#1e293b"
-        pillTextColor="#e2e8f0"
-        hoveredPillTextColor="#38bdf8"
-        initialLoadAnimation={false}
-      />
+      {isPending ? (
+        // Skeleton nav while the session resolves, sized to match the pill bar.
+        <div className="flex items-center gap-2 rounded-full bg-slate-900/40 p-1.5">
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <Skeleton className="h-8 w-20 rounded-full" />
+          <Skeleton className="h-8 w-20 rounded-full" />
+          <Skeleton className="h-8 w-20 rounded-full" />
+        </div>
+      ) : (
+        <PillNav
+          logo="/logo.svg"
+          logoAlt="SentinelStack"
+          items={items}
+          activeHref={pathname}
+          baseColor="#0f172a"
+          pillColor="#1e293b"
+          pillTextColor="#e2e8f0"
+          hoveredPillTextColor="#38bdf8"
+          initialLoadAnimation={false}
+        />
+      )}
       <ThemeToggle />
     </div>
   );
