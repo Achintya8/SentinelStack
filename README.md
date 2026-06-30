@@ -94,16 +94,3 @@ For high-risk events, Gemini receives the suspicious login metadata plus the use
 }
 ```
 
-## Data Collections
-
-- `user` - Better Auth users plus `isFlagged` and `riskScore`
-- `session` - Better Auth sessions plus `location`
-- `account` - Better Auth account records
-- `verification` - Better Auth verification records
-- `securityLog` - SentinelStack security events and AI analysis
-
-## Notes
-
-- Local/private IPs use realistic mock geolocation data so development works without a public IP.
-- Real IP geolocation uses `ip-api.com` when the incoming IP is public.
-- The profile UI attempts Better Auth’s `authClient.session.revoke({ id })` shape first and falls back to token-based `authClient.revokeSession({ token })` for compatibility.
